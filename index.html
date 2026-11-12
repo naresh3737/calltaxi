@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeloceRide — Premium On-Demand Taxi & Chauffeur Booking</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            900: '#0f172a',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(15, 23, 42, 0.08)',
+                        'card': '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-amber-400 selection:text-slate-950 min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container (Replaces alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <!-- Brand Logo -->
+                <button onclick="resetToHome()" class="flex items-center gap-2.5 group focus:outline-none">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-amber-400 shadow-md group-hover:scale-105 transition-transform">
+                        <i data-lucide="car-taxi-front" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="font-display font-extrabold text-xl tracking-tight text-slate-900">NDR<span class="text-amber-500">CALL TAXI</span></span>
+                        <span class="hidden sm:block text-[11px] font-medium text-slate-400 -mt-1">Express City & Airport Cabs</span>
+                    </div>
+                </button>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+                    <button onclick="resetToHome()" class="hover:text-slate-900 transition-colors">Book a Ride</button>
+                    <a href="#fleet-showcase" onclick="resetToHome()" class="hover:text-slate-900 transition-colors">Our Fleet</a>
+                    <a href="#how-it-works" onclick="resetToHome()" class="hover:text-slate-900 transition-colors">How it Works</a>
+                    <button onclick="openMyTripsModal()" class="hover:text-slate-900 transition-colors flex items-center gap-1.5">
+                        <span>My Trips</span>
+                        <span id="trip-badge" class="hidden px-1.5 py-0.5 text-[10px] font-bold bg-amber-400 text-slate-950 rounded-full">0</span>
+                    </button>
+                </nav>
+
+                <!-- Auth Controls -->
+                <div class="flex items-center gap-2 sm:gap-3" id="auth-header-controls">
+                    <button onclick="openAuthModal('login')" class="px-4 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors">
+                        Log in
+                    </button>
+                    <button onclick="openAuthModal('signup')" class="px-4 sm:px-5 py-2.5 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-95">
+                        Sign up
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Viewport -->
+    <main class="flex-grow">
+        
+        <!-- STEP 1: HOME / HERO & BOOKING SEARCH SECTION -->
+        <section id="view-home" class="transition-all duration-300">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden bg-slate-900 text-white pt-12 pb-24 sm:pt-16 sm:pb-32 lg:pt-20 lg:pb-36">
+                <!-- Subtle Decorative Background Grid & Glow -->
+                <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(#fbbf24 1px, transparent 1px); background-size: 28px 28px;"></div>
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+                        
+                        <!-- Left Column: Value Proposition -->
+                        <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-amber-300 text-xs font-semibold tracking-wide uppercase">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                24/7 Instant Dispatch • Zero Hidden Fees
+                            </div>
+                            <h1 class="font-display text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12]">
+                                Your reliable ride, <span class="text-amber-400">minutes away.</span>
+                            </h1>
+                            <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                                From quick city hops to executive airport transfers. Choose your comfort tier, see transparent upfront fares, and ride with top-rated verified chauffeurs.
+                            </p>
+                            
+                            <!-- Trust Metrics -->
+                            <div class="pt-2 flex flex-wrap justify-center lg:justify-start gap-6 sm:gap-8 text-sm">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-amber-400">
+                                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="font-bold text-white">Verified Drivers</div>
+                                        <div class="text-xs text-slate-400">100% background checked</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-amber-400">
+                                        <i data-lucide="clock" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="font-bold text-white">3-Min Avg ETA</div>
+                                        <div class="text-xs text-slate-400">Across 45+ city zones</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Interactive Booking Widget -->
+                        <div class="lg:col-span-6">
+                            <div class="bg-white text-slate-900 rounded-3xl p-5 sm:p-8 shadow-2xl border border-slate-100">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h2 class="font-display text-xl sm:text-2xl font-bold text-slate-900">Where to?</h2>
+                                        <p class="text-xs sm:text-sm text-slate-500">Enter trip details for instant cab quotes</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold flex items-center gap-1.5">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Cabs Nearby
+                                    </span>
+                                </div>
+
+                                <form id="booking-search-form" onsubmit="handleSearchCabs(event)" class="space-y-4">
+                                    <!-- Route Inputs Container with Visual Connector -->
+                                    <div class="relative space-y-3">
+                                        <!-- Vertical route line -->
+                                        <div class="hidden sm:block absolute left-6 top-10 bottom-10 w-0.5 bg-slate-200 z-0"></div>
+
+                                        <!-- Pickup Location -->
+                                        <div class="relative z-10">
+                                            <label for="pickup-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Pickup Location</label>
+                                            <div class="relative flex items-center">
+                                                <div class="absolute left-3.5 w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 pointer-events-none">
+                                                    <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                                                </div>
+                                                <input type="text" id="pickup-input" required placeholder="e.g., Central Railway Station, MG Road"
+                                                    class="w-full pl-11 pr-24 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all">
+                                                <button type="button" onclick="useCurrentLocation()" title="Use Current Location"
+                                                    class="absolute right-2.5 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl flex items-center gap-1 transition-colors">
+                                                    <i data-lucide="locate-fixed" class="w-3.5 h-3.5 text-amber-500"></i>
+                                                    <span>GPS</span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Swap Locations Floating Button -->
+                                        <div class="flex justify-end sm:justify-center -my-1.5 relative z-20">
+                                            <button type="button" onclick="swapLocations()" title="Swap Pickup & Drop-off"
+                                                class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow hover:border-amber-400 text-slate-600 hover:text-slate-900 flex items-center justify-center transition-all active:rotate-180">
+                                                <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+
+                                        <!-- Drop-off Location -->
+                                        <div class="relative z-10">
+                                            <label for="dropoff-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Drop-off Destination</label>
+                                            <div class="relative flex items-center">
+                                                <div class="absolute left-3.5 w-5 h-5 rounded-full bg-slate-900/10 flex items-center justify-center text-slate-900 pointer-events-none">
+                                                    <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                                                </div>
+                                                <input type="text" id="dropoff-input" required placeholder="e.g., International Airport Terminal 2"
+                                                    class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Quick Popular Routes Pills -->
+                                    <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                                        <span class="text-[11px] font-medium text-slate-400 mr-1">Popular:</span>
+                                        <button type="button" onclick="fillPresetRoute('Central Metro Plaza', 'International Airport T1', 18.4)" class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-slate-900 transition-colors">Airport Express</button>
+                                        <button type="button" onclick="fillPresetRoute('Tech Park Phase II', 'Grand Marina Mall', 8.2)" class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-slate-900 transition-colors">Tech Park → Mall</button>
+                                        <button type="button" onclick="fillPresetRoute('Heritage Hotel Downtown', 'Highland Business District', 12.6)" class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-slate-900 transition-colors">Downtown → CBD</button>
+                                    </div>
+
+                                    <!-- Date & Time Selection Grid -->
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                        <div>
+                                            <label for="pickup-date" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Pickup Date</label>
+                                            <div class="relative">
+                                                <input type="date" id="pickup-date" required
+                                                    class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="pickup-time" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Pickup Time</label>
+                                            <div class="relative">
+                                                <input type="time" id="pickup-time" required
+                                                    class="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Search Cabs Button -->
+                                    <button type="submit"
+                                        class="w-full mt-2 py-4 px-6 bg-amber-400 hover:bg-amber-500 text-slate-950 font-display font-bold text-base rounded-2xl shadow-lg shadow-amber-400/25 flex items-center justify-center gap-2.5 transition-all transform active:scale-[0.99]">
+                                        <i data-lucide="search" class="w-5 h-5"></i>
+                                        <span>Search Cabs</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fleet Preview & Features Section (Visible on Home) -->
+            <div id="fleet-showcase" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <span class="text-xs font-bold uppercase tracking-widest text-amber-600">Tailored Comfort</span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">A Cab Tier for Every Occasion</h2>
+                    <p class="text-slate-500 text-sm sm:text-base mt-2">Whether you're commuting solo on a budget or traveling with family and luggage, we have the ideal vehicle ready.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Mini Card -->
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card hover:shadow-soft transition-all group">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="car" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-bold text-lg text-slate-900">Veloce Mini</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">3 Seats</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">Compact, nimble hatchbacks ideal for quick solo city commutes and tight traffic.</p>
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700">
+                            <span>Starts at $1.20/km</span>
+                            <span class="text-emerald-600">AC • Eco</span>
+                        </div>
+                    </div>
+
+                    <!-- Sedan Card -->
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card hover:shadow-soft transition-all group">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="car-front" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-bold text-lg text-slate-900">Prime Sedan</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">4 Seats</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">Spacious legroom, generous boot space, and top-rated drivers for everyday comfort.</p>
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700">
+                            <span>Starts at $1.65/km</span>
+                            <span class="text-blue-600">Wi-Fi • 2 Bags</span>
+                        </div>
+                    </div>
+
+                    <!-- SUV Card -->
+                    <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card hover:shadow-soft transition-all group">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="truck" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-bold text-lg text-slate-900">XL SUV</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">6 Seats</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2 leading-relaxed">Roomy 6-seater SUVs built for group outings, family trips, and heavy airport luggage.</p>
+                        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700">
+                            <span>Starts at $2.30/km</span>
+                            <span class="text-emerald-600">Dual AC • 4 Bags</span>
+                        </div>
+                    </div>
+
+                    <!-- Luxury Card -->
+                    <div class="bg-slate-900 text-white rounded-3xl p-6 border border-slate-800 shadow-card hover:shadow-soft transition-all group">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-display font-bold text-lg text-white">Executive Lux</h3>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-amber-300">4 Seats</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">Flagship black sedans with leather interiors, refreshments, and uniformed chauffeurs.</p>
+                        <div class="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-semibold text-amber-400">
+                            <span>Starts at $3.40/km</span>
+                            <span>VIP Lounge</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How it Works Strip -->
+                <div id="how-it-works" class="mt-16 bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-card">
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 font-display font-bold flex items-center justify-center shrink-0">1</div>
+                            <div>
+                                <h4 class="font-display font-bold text-base text-slate-900">Set Your Route & Time</h4>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1">Enter pickup and destination addresses along with immediate or scheduled timing.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 font-display font-bold flex items-center justify-center shrink-0">2</div>
+                            <div>
+                                <h4 class="font-display font-bold text-base text-slate-900">Compare Transparent Fares</h4>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1">Inspect live ETAs, vehicle amenities, and locked-in fare breakdowns across 4 cab tiers.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-slate-900 text-amber-400 font-display font-bold flex items-center justify-center shrink-0">3</div>
+                            <div>
+                                <h4 class="font-display font-bold text-base text-slate-900">Instant Driver Assignment</h4>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1">Receive your booking pass, chauffeur contact details, and vehicle plate number immediately.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: TAXI SELECTION & FARE DETAILS VIEW -->
+        <section id="view-selection" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 transition-all duration-300">
+            <!-- Stepper & Back Navigation -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <button onclick="goToStep('home')" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-xs w-fit transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Modify Route</span>
+                </button>
+
+                <!-- Step Indicator Pills -->
+                <div class="flex items-center gap-2 text-xs font-semibold">
+                    <span class="px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i> 1. Route
+                    </span>
+                    <span class="w-4 h-0.5 bg-slate-300"></span>
+                    <span class="px-3 py-1.5 rounded-full bg-slate-900 text-amber-400">
+                        2. Select Cab
+                    </span>
+                    <span class="w-4 h-0.5 bg-slate-300"></span>
+                    <span class="px-3 py-1.5 rounded-full bg-slate-200 text-slate-500">
+                        3. Confirmation
+                    </span>
+                </div>
+            </div>
+
+            <!-- Route Summary Banner -->
+            <div class="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 mb-8 shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></div>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400">Pickup</div>
+                            <div id="summary-pickup" class="font-semibold text-sm sm:text-base text-white line-clamp-1">Central Station</div>
+                        </div>
+                    </div>
+                    <i data-lucide="arrow-right" class="hidden sm:block w-5 h-5 text-slate-500 shrink-0"></i>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></div>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-slate-400">Drop-off</div>
+                            <div id="summary-dropoff" class="font-semibold text-sm sm:text-base text-white line-clamp-1">International Airport</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 sm:gap-5 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-800 text-xs sm:text-sm">
+                    <div class="flex items-center gap-1.5 text-slate-300">
+                        <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+                        <span id="summary-datetime">Today, 14:30</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl font-semibold text-amber-300">
+                        <i data-lucide="navigation" class="w-4 h-4"></i>
+                        <span id="summary-distance">14.2 km • ~26 mins</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Selection Grid: Cab Tiers (Left) + Fare Breakdown & Payment (Right) -->
+            <div class="grid lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Column: Available Cab Tiers -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display text-xl font-bold text-slate-900">Choose your ride</h2>
+                        <span class="text-xs font-medium text-slate-500">All fares include taxes & tolls</span>
+                    </div>
+
+                    <!-- Cab Cards Container (Populated dynamically via JS) -->
+                    <div id="cab-tiers-list" class="space-y-3.5"></div>
+                </div>
+
+                <!-- Right Column: Detailed Fare Breakdown & Checkout Panel -->
+                <div class="lg:col-span-5 sticky top-24">
+                    <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-soft space-y-6">
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-amber-600">Selected Tier</span>
+                                <h3 id="detail-cab-name" class="font-display text-2xl font-extrabold text-slate-900 mt-0.5">Prime Sedan</h3>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Arrives in</span>
+                                <span id="detail-cab-eta" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-sm mt-0.5">
+                                    4 mins
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Amenities Tags -->
+                        <div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2.5">Included Amenities</div>
+                            <div id="detail-amenities" class="flex flex-wrap gap-2">
+                                <!-- Filled via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Transparent Fare Breakdown -->
+                        <div class="bg-slate-50 rounded-2xl p-4 space-y-2.5 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                                <span>Base Fare</span>
+                                <span id="fare-base" class="font-medium text-slate-900">$4.00</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span id="fare-distance-label">Distance Charge (14.2 km)</span>
+                                <span id="fare-distance" class="font-medium text-slate-900">$23.43</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Platform & Booking Fee</span>
+                                <span id="fare-service" class="font-medium text-slate-900">$1.50</span>
+                            </div>
+                            <div id="promo-discount-row" class="hidden justify-between text-emerald-600 font-medium">
+                                <span>Promo Applied (FIRST20)</span>
+                                <span id="fare-discount">-$4.00</span>
+                            </div>
+                            <div class="pt-2.5 border-t border-slate-200 flex justify-between items-center">
+                                <span class="font-bold text-slate-900">Estimated Total</span>
+                                <span id="fare-total" class="font-display text-2xl font-extrabold text-slate-900">$28.93</span>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code Input -->
+                        <div>
+                            <div class="flex gap-2">
+                                <input type="text" id="promo-input" placeholder="Promo code (try FIRST20)"
+                                    class="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium uppercase focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                <button type="button" onclick="applyPromoCode()"
+                                    class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method Selector -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Payment Method</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button type="button" onclick="selectPayment('Card •••• 4242')" data-pay="Card •••• 4242"
+                                    class="pay-btn active-pay p-2.5 rounded-xl border-2 border-slate-900 bg-slate-900/5 text-xs font-semibold text-slate-900 flex flex-col items-center gap-1 transition-all">
+                                    <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                    <span>Card</span>
+                                </button>
+                                <button type="button" onclick="selectPayment('Apple / GPay')" data-pay="Apple / GPay"
+                                    class="pay-btn p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-600 flex flex-col items-center gap-1 transition-all">
+                                    <i data-lucide="smartphone" class="w-4 h-4"></i>
+                                    <span>Wallet</span>
+                                </button>
+                                <button type="button" onclick="selectPayment('Cash to Driver')" data-pay="Cash to Driver"
+                                    class="pay-btn p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-600 flex flex-col items-center gap-1 transition-all">
+                                    <i data-lucide="banknote" class="w-4 h-4"></i>
+                                    <span>Cash</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Booking CTA -->
+                        <button type="button" onclick="confirmBooking()"
+                            class="w-full py-4 px-6 bg-amber-400 hover:bg-amber-500 text-slate-950 font-display font-bold text-base rounded-2xl shadow-lg shadow-amber-400/25 flex items-center justify-center gap-2 transition-all active:scale-[0.99]">
+                            <span>Confirm & Book Ride</span>
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3: BOOKING CONFIRMATION VIEW -->
+        <section id="view-confirmation" class="hidden max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 transition-all duration-300">
+            <div class="bg-white rounded-3xl border border-slate-200/90 shadow-soft overflow-hidden">
+                <!-- Top Success Header -->
+                <div class="bg-slate-900 text-white p-6 sm:p-8 text-center relative overflow-hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-400 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="check-circle-2" class="w-9 h-9"></i>
+                    </div>
+                    <span class="inline-block px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold tracking-wider uppercase mb-2">
+                        Driver En Route
+                    </span>
+                    <h2 class="font-display text-2xl sm:text-3xl font-extrabold">Booking Confirmed!</h2>
+                    <p class="text-slate-300 text-sm mt-1">Your chauffeur has accepted the trip and is heading to your pickup point.</p>
+                    
+                    <!-- Booking Reference Pill -->
+                    <div class="mt-5 inline-flex items-center gap-3 bg-white/10 border border-white/15 px-4 py-2 rounded-2xl">
+                        <span class="text-xs text-slate-300">Booking Ref:</span>
+                        <span id="conf-ref" class="font-mono font-bold text-amber-400 text-sm tracking-wider">VR-849201</span>
+                        <button onclick="copyBookingRef()" title="Copy Reference" class="text-slate-300 hover:text-white transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Driver & Vehicle Assignment Card -->
+                <div class="p-6 sm:p-8 space-y-6">
+                    <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <!-- Driver Avatar SVG -->
+                            <div class="w-14 h-14 rounded-2xl bg-slate-900 text-amber-400 flex items-center justify-center font-display font-bold text-xl shrink-0 shadow-sm">
+                                <span id="conf-driver-initials">MK</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 id="conf-driver-name" class="font-display font-bold text-base sm:text-lg text-slate-900">Marcus Vance</h3>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-xs font-bold">
+                                        <i data-lucide="star" class="w-3 h-3 fill-amber-500 text-amber-500"></i>
+                                        <span id="conf-driver-rating">4.94</span>
+                                    </span>
+                                </div>
+                                <p id="conf-vehicle-model" class="text-xs sm:text-sm text-slate-600 mt-0.5">Toyota Camry Hybrid • Pearl White</p>
+                                <div class="mt-1.5 inline-block px-2.5 py-0.5 bg-white border border-slate-300 rounded-md font-mono text-xs font-bold text-slate-800 tracking-wider" id="conf-plate">
+                                    CAB • 7842
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Contact Actions -->
+                        <div class="flex items-center gap-2.5 self-end sm:self-center">
+                            <button onclick="showToast('Connecting masked voice call to your driver...', 'info')"
+                                class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-800 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all">
+                                <i data-lucide="phone" class="w-4 h-4 text-emerald-600"></i>
+                                <span>Call</span>
+                            </button>
+                            <button onclick="showToast('OTP PIN 4829 shared with driver upon arrival.', 'info')"
+                                class="px-3.5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-1.5">
+                                <span>PIN: <strong class="text-amber-400">4829</strong></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Complete Trip Summary -->
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Trip Summary</h4>
+                        <div class="space-y-3 pl-2 border-l-2 border-slate-200 ml-1.5">
+                            <div class="relative pl-4">
+                                <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-white"></div>
+                                <div class="text-xs text-slate-400">Pickup Location</div>
+                                <div id="conf-pickup" class="text-sm font-semibold text-slate-900">Central Station</div>
+                            </div>
+                            <div class="relative pl-4">
+                                <div class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-slate-900 ring-4 ring-white"></div>
+                                <div class="text-xs text-slate-400">Drop-off Destination</div>
+                                <div id="conf-dropoff" class="text-sm font-semibold text-slate-900">International Airport</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="text-[11px] text-slate-400">Date & Time</div>
+                                <div id="conf-datetime" class="text-xs font-bold text-slate-800 mt-0.5">Nov 12, 14:30</div>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="text-[11px] text-slate-400">Cab Tier</div>
+                                <div id="conf-tier" class="text-xs font-bold text-slate-800 mt-0.5">Prime Sedan</div>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <div class="text-[11px] text-slate-400">Payment</div>
+                                <div id="conf-payment" class="text-xs font-bold text-slate-800 mt-0.5">Card •••• 4242</div>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200/70">
+                                <div class="text-[11px] text-amber-800">Total Paid</div>
+                                <div id="conf-total" class="text-sm font-display font-extrabold text-slate-900 mt-0.5">$28.93</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Buttons -->
+                    <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                        <button onclick="resetToHome()"
+                            class="flex-1 py-3.5 px-5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-2xl transition-all">
+                            Book Another Ride
+                        </button>
+                        <button onclick="openMyTripsModal()"
+                            class="py-3.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm rounded-2xl transition-all">
+                            View All Bookings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-2 font-semibold text-slate-800">
+                <i data-lucide="car-taxi-front" class="w-4 h-4 text-amber-500"></i>
+                <span>VeloceRide Technologies Inc.</span>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" onclick="event.preventDefault(); showToast('24/7 Rider Support: +1 (800) 555-RIDE', 'info')" class="hover:text-slate-900">24/7 Support</a>
+                <a href="#" onclick="event.preventDefault(); showToast('All rides are insured up to $1M.', 'info')" class="hover:text-slate-900">Safety Policy</a>
+                <a href="#" onclick="event.preventDefault(); showToast('Transparent per-km pricing with zero surge surprises.', 'info')" class="hover:text-slate-900">Fare Guarantee</a>
+            </div>
+            <div>© 2026 VeloceRide. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE LOGIN & SIGNUP MODAL -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs transition-opacity">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center">
+                        <i data-lucide="car-taxi-front" class="w-4 h-4"></i>
+                    </div>
+                    <span class="font-display font-bold text-lg text-slate-900">VeloceRide Account</span>
+                </div>
+                <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Tab Switcher -->
+            <div class="px-6 pt-4">
+                <div class="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl">
+                    <button type="button" id="tab-login" onclick="switchAuthTab('login')"
+                        class="py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-2xs transition-all">
+                        Log In
+                    </button>
+                    <button type="button" id="tab-signup" onclick="switchAuthTab('signup')"
+                        class="py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition-all">
+                        Create Account
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="form-login" onsubmit="handleAuthSubmit(event, 'login')" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
+                    <input type="email" id="login-email" required placeholder="alex@example.com"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-semibold text-slate-600">Password</label>
+                        <button type="button" onclick="showToast('Password reset link sent to your email.', 'info')" class="text-[11px] font-semibold text-amber-600 hover:underline">Forgot?</button>
+                    </div>
+                    <input type="password" id="login-password" required placeholder="••••••••"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit"
+                    class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-display font-bold text-sm rounded-xl shadow-md transition-all">
+                    Log In to Ride
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="form-signup" onsubmit="handleAuthSubmit(event, 'signup')" class="hidden p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Full Name</label>
+                    <input type="text" id="signup-name" required placeholder="Jordan Taylor"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email Address</label>
+                    <input type="email" id="signup-email" required placeholder="jordan@example.com"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mobile Number</label>
+                    <input type="tel" id="signup-phone" required placeholder="+1 (555) 234-5678"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Create Password</label>
+                    <input type="password" id="signup-password" required placeholder="Min. 6 characters"
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit"
+                    class="w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-display font-bold text-sm rounded-xl shadow-md transition-all">
+                    Create Free Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MY TRIPS HISTORY MODAL -->
+    <div id="trips-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-display font-bold text-lg text-slate-900">Your Booked Trips</h3>
+                <button onclick="closeMyTripsModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div id="trips-list-container" class="p-6 max-h-[65vh] overflow-y-auto space-y-3">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- 1. STATE & DATA MODELS ---
+        const CAB_TIERS = [
+            {
+                id: 'mini',
+                name: 'Veloce Mini',
+                tagline: 'Affordable compact hatchbacks',
+                seats: 3,
+                bags: 1,
+                etaMins: 2,
+                baseFare: 3.00,
+                perKm: 1.20,
+                icon: 'car',
+                badge: 'Best Value',
+                amenities: ['Air Conditioning', 'Eco-Friendly', 'USB Charger'],
+                driver: { name: 'Liam Carter', initials: 'LC', rating: '4.89', car: 'Hyundai i20 • Silver', plate: 'VLC • 3091' }
+            },
+            {
+                id: 'sedan',
+                name: 'Prime Sedan',
+                tagline: 'Comfortable sedans with extra legroom',
+                seats: 4,
+                bags: 2,
+                etaMins: 4,
+                baseFare: 4.50,
+                perKm: 1.65,
+                icon: 'car-front',
+                badge: 'Most Popular',
+                amenities: ['Climate Control', 'Free Wi-Fi', '2 Large Bags', 'Top-Rated Driver'],
+                driver: { name: 'Marcus Vance', initials: 'MV', rating: '4.96', car: 'Toyota Camry Hybrid • White', plate: 'VLC • 7842' }
+            },
+            {
+                id: 'suv',
+                name: 'XL SUV',
+                tagline: 'Spacious 6-seaters for groups & luggage',
+                seats: 6,
+                bags: 4,
+                etaMins: 6,
+                baseFare: 6.50,
+                perKm: 2.30,
+                icon: 'truck',
+                badge: 'Group Choice',
+                amenities: ['Dual-Zone AC', '6-Seater Cabin', '4 Suitcases', 'Extra Legroom'],
+                driver: { name: 'Elena Rostova', initials: 'ER', rating: '4.94', car: 'Kia Carnival • Midnight Blue', plate: 'VLC • 5510' }
+            },
+            {
+                id: 'luxury',
+                name: 'Executive Lux',
+                tagline: 'High-end business class chauffeurs',
+                seats: 4,
+                bags: 3,
+                etaMins: 7,
+                baseFare: 11.00,
+                perKm: 3.40,
+                icon: 'crown',
+                badge: 'VIP Class',
+                amenities: ['Nappa Leather', 'Bottled Water', 'High-Speed Wi-Fi', 'Chauffeur Attire'],
+                driver: { name: 'Julian Sterling', initials: 'JS', rating: '4.99', car: 'Mercedes-Benz E-Class • Obsidian', plate: 'LUX • 0019' }
+            }
+        ];
+
+        const appState = {
+            currentStep: 'home',
+            pickup: '',
+            dropoff: '',
+            date: '',
+            time: '',
+            distanceKm: 14.2,
+            durationMins: 26,
+            selectedCabId: 'sedan',
+            promoApplied: false,
+            paymentMethod: 'Card •••• 4242',
+            user: null,
+            bookings: []
+        };
+
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initializeDefaultDateTime();
+            renderCabTiers();
+        });
+
+        function initializeDefaultDateTime() {
+            const dateInput = document.getElementById('pickup-date');
+            const timeInput = document.getElementById('pickup-time');
+            const now = new Date();
+            
+            // Format YYYY-MM-DD
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            
+            dateInput.value = todayStr;
+            dateInput.min = todayStr;
+
+            // Default pickup time: 15 mins from now
+            now.setMinutes(now.getMinutes() + 15);
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            timeInput.value = `${hours}:${mins}`;
+        }
+
+        // --- 3. HOME FORM INTERACTIONS ---
+        function useCurrentLocation() {
+            const pickupInput = document.getElementById('pickup-input');
+            pickupInput.value = 'Current GPS Location (Downtown Avenue)';
+            showToast('Location detected via GPS', 'success');
+        }
+
+        function swapLocations() {
+            const pickup = document.getElementById('pickup-input');
+            const dropoff = document.getElementById('dropoff-input');
+            const temp = pickup.value;
+            pickup.value = dropoff.value;
+            dropoff.value = temp;
+        }
+
+        function fillPresetRoute(pickup, dropoff, distKm) {
+            document.getElementById('pickup-input').value = pickup;
+            document.getElementById('dropoff-input').value = dropoff;
+            appState.distanceKm = distKm;
+            appState.durationMins = Math.round(distKm * 1.85);
+            showToast(`Route set: ${pickup} → ${dropoff}`, 'info');
+        }
+
+        function handleSearchCabs(event) {
+            event.preventDefault();
+            const pickup = document.getElementById('pickup-input').value.trim();
+            const dropoff = document.getElementById('dropoff-input').value.trim();
+            const date = document.getElementById('pickup-date').value;
+            const time = document.getElementById('pickup-time').value;
+
+            if (!pickup || !dropoff) {
+                showToast('Please enter both pickup and drop-off locations.', 'error');
+                return;
+            }
+
+            // Generate realistic deterministic distance if custom text was entered
+            if (appState.pickup !== pickup || appState.dropoff !== dropoff) {
+                const seed = (pickup.length + dropoff.length) % 18;
+                appState.distanceKm = Number((6.4 + seed * 1.15).toFixed(1));
+                appState.durationMins = Math.round(appState.distanceKm * 1.9 + 5);
+            }
+
+            appState.pickup = pickup;
+            appState.dropoff = dropoff;
+            appState.date = date;
+            appState.time = time;
+
+            // Update Summary Banner
+            document.getElementById('summary-pickup').textContent = pickup;
+            document.getElementById('summary-dropoff').textContent = dropoff;
+            document.getElementById('summary-datetime').textContent = `${formatReadableDate(date)} at ${time}`;
+            document.getElementById('summary-distance').textContent = `${appState.distanceKm} km • ~${appState.durationMins} mins`;
+
+            renderCabTiers();
+            updateFareDetailsPanel();
+            goToStep('selection');
+        }
+
+        // --- 4. CAB SELECTION & FARE CALCULATION ---
+        function calculateTierFare(tier) {
+            const serviceFee = 1.50;
+            const distanceCost = tier.perKm * appState.distanceKm;
+            const subtotal = tier.baseFare + distanceCost + serviceFee;
+            const discount = appState.promoApplied ? Math.min(4.00, subtotal * 0.2) : 0;
+            const total = Math.max(0, subtotal - discount);
+
+            return {
+                base: tier.baseFare,
+                distanceCost,
+                serviceFee,
+                discount,
+                total
+            };
+        }
+
+        function renderCabTiers() {
+            const container = document.getElementById('cab-tiers-list');
+            container.innerHTML = '';
+
+            CAB_TIERS.forEach(tier => {
+                const isSelected = tier.id === appState.selectedCabId;
+                const fare = calculateTierFare(tier);
+
+                const card = document.createElement('div');
+                card.onclick = () => selectCabTier(tier.id);
+                card.className = `cursor-pointer rounded-3xl p-4 sm:p-5 border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                    isSelected
+                        ? 'border-slate-900 bg-white shadow-soft ring-4 ring-amber-400/20'
+                        : 'border-slate-200/80 bg-white/80 hover:bg-white hover:border-slate-300'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-start sm:items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-colors ${
+                            isSelected ? 'bg-slate-900 text-amber-400' : 'bg-slate-100 text-slate-700'
+                        }">
+                            <i data-lucide="${tier.icon}" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="font-display font-bold text-base sm:text-lg text-slate-900">${tier.name}</h3>
+                                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                                    isSelected ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 text-slate-600'
+                                }">${tier.badge}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">${tier.tagline}</p>
+                            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-medium text-slate-600">
+                                <span class="inline-flex items-center gap-1"><i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i> ${tier.seats}</span>
+                                <span class="inline-flex items-center gap-1"><i data-lucide="briefcase" class="w-3.5 h-3.5 text-slate-400"></i> ${tier.bags}</span>
+                                <span class="inline-flex items-center gap-1 text-emerald-600 font-semibold"><i data-lucide="clock" class="w-3.5 h-3.5"></i> ${tier.etaMins} min away</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex sm:flex-col items-center sm:items-end justify-between pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                        <div class="text-xs text-slate-400 sm:hidden">Estimated Fare</div>
+                        <div class="text-right">
+                            <div class="font-display text-xl sm:text-2xl font-extrabold text-slate-900">$${fare.total.toFixed(2)}</div>
+                            <div class="text-[11px] text-slate-400">$${tier.perKm.toFixed(2)}/km</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function selectCabTier(tierId) {
+            appState.selectedCabId = tierId;
+            renderCabTiers();
+            updateFareDetailsPanel();
+        }
+
+        function updateFareDetailsPanel() {
+            const tier = CAB_TIERS.find(t => t.id === appState.selectedCabId) || CAB_TIERS[1];
+            const fare = calculateTierFare(tier);
+
+            document.getElementById('detail-cab-name').textContent = tier.name;
+            document.getElementById('detail-cab-eta').textContent = `${tier.etaMins} mins`;
+
+            // Render Amenities
+            const amenitiesContainer = document.getElementById('detail-amenities');
+            amenitiesContainer.innerHTML = tier.amenities.map(item => `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">
+                    <i data-lucide="check" class="w-3 h-3 text-emerald-600"></i>
+                    ${item}
+                </span>
+            `).join('');
+
+            // Render Fare Numbers
+            document.getElementById('fare-base').textContent = `$${fare.base.toFixed(2)}`;
+            document.getElementById('fare-distance-label').textContent = `Distance Charge (${appState.distanceKm} km)`;
+            document.getElementById('fare-distance').textContent = `$${fare.distanceCost.toFixed(2)}`;
+            document.getElementById('fare-service').textContent = `$${fare.serviceFee.toFixed(2)}`;
+
+            const promoRow = document.getElementById('promo-discount-row');
+            if (appState.promoApplied) {
+                promoRow.classList.remove('hidden');
+                promoRow.classList.add('flex');
+                document.getElementById('fare-discount').textContent = `-$${fare.discount.toFixed(2)}`;
+            } else {
+                promoRow.classList.add('hidden');
+                promoRow.classList.remove('flex');
+            }
+
+            document.getElementById('fare-total').textContent = `$${fare.total.toFixed(2)}`;
+            lucide.createIcons();
+        }
+
+        function applyPromoCode() {
+            const code = document.getElementById('promo-input').value.trim().toUpperCase();
+            if (code === 'FIRST20' || code === 'VELOCE') {
+                appState.promoApplied = true;
+                renderCabTiers();
+                updateFareDetailsPanel();
+                showToast('Promo code applied! You saved 20%.', 'success');
+            } else {
+                showToast('Invalid code. Try promo code: FIRST20', 'error');
+            }
+        }
+
+        function selectPayment(method) {
+            appState.paymentMethod = method;
+            document.querySelectorAll('.pay-btn').forEach(btn => {
+                if (btn.dataset.pay === method) {
+                    btn.className = 'pay-btn p-2.5 rounded-xl border-2 border-slate-900 bg-slate-900/5 text-xs font-semibold text-slate-900 flex flex-col items-center gap-1 transition-all';
+                } else {
+                    btn.className = 'pay-btn p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-600 flex flex-col items-center gap-1 transition-all';
+                }
+            });
+        }
+
+        // --- 5. BOOKING CONFIRMATION ---
+        function confirmBooking() {
+            const tier = CAB_TIERS.find(t => t.id === appState.selectedCabId) || CAB_TIERS[1];
+            const fare = calculateTierFare(tier);
+            const refCode = 'VR-' + Math.floor(100000 + Math.random() * 900000);
+
+            const bookingRecord = {
+                ref: refCode,
+                pickup: appState.pickup,
+                dropoff: appState.dropoff,
+                datetime: `${formatReadableDate(appState.date)}, ${appState.time}`,
+                tierName: tier.name,
+                driver: tier.driver,
+                payment: appState.paymentMethod,
+                total: fare.total.toFixed(2)
+            };
+
+            appState.bookings.unshift(bookingRecord);
+            updateTripBadge();
+
+            // Populate Confirmation UI
+            document.getElementById('conf-ref').textContent = bookingRecord.ref;
+            document.getElementById('conf-driver-initials').textContent = tier.driver.initials;
+            document.getElementById('conf-driver-name').textContent = tier.driver.name;
+            document.getElementById('conf-driver-rating').textContent = tier.driver.rating;
+            document.getElementById('conf-vehicle-model').textContent = tier.driver.car;
+            document.getElementById('conf-plate').textContent = tier.driver.plate;
+
+            document.getElementById('conf-pickup').textContent = bookingRecord.pickup;
+            document.getElementById('conf-dropoff').textContent = bookingRecord.dropoff;
+            document.getElementById('conf-datetime').textContent = bookingRecord.datetime;
+            document.getElementById('conf-tier').textContent = bookingRecord.tierName;
+            document.getElementById('conf-payment').textContent = bookingRecord.payment;
+            document.getElementById('conf-total').textContent = `$${bookingRecord.total}`;
+
+            goToStep('confirmation');
+            showToast(`Cab booked! Reference ${refCode}`, 'success');
+        }
+
+        function copyBookingRef() {
+            const refText = document.getElementById('conf-ref').textContent;
+            const tempInput = document.createElement('input');
+            tempInput.value = refText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(`Copied booking ID ${refText}`, 'success');
+        }
+
+        // --- 6. NAVIGATION & VIEW TRANSITIONS ---
+        function goToStep(stepName) {
+            appState.currentStep = stepName;
+            document.getElementById('view-home').classList.add('hidden');
+            document.getElementById('view-selection').classList.add('hidden');
+            document.getElementById('view-confirmation').classList.add('hidden');
+
+            document.getElementById(`view-${stepName}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        function resetToHome() {
+            goToStep('home');
+        }
+
+        // --- 7. LOGIN & SIGNUP MODALS ---
+        function openAuthModal(tab = 'login') {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchAuthTab(tab);
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function switchAuthTab(tab) {
+            const loginTab = document.getElementById('tab-login');
+            const signupTab = document.getElementById('tab-signup');
+            const loginForm = document.getElementById('form-login');
+            const signupForm = document.getElementById('form-signup');
+
+            if (tab === 'login') {
+                loginTab.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-2xs transition-all';
+                signupTab.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition-all';
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+            } else {
+                signupTab.className = 'py-2 text-xs font-bold rounded-xl bg-white text-slate-900 shadow-2xs transition-all';
+                loginTab.className = 'py-2 text-xs font-bold rounded-xl text-slate-500 hover:text-slate-900 transition-all';
+                signupForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        function handleAuthSubmit(event, type) {
+            event.preventDefault();
+            if (type === 'login') {
+                const email = document.getElementById('login-email').value.trim();
+                const namePart = email.split('@')[0];
+                const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                appState.user = { name: formattedName, email };
+                showToast(`Welcome back, ${formattedName}!`, 'success');
+            } else {
+                const name = document.getElementById('signup-name').value.trim();
+                const email = document.getElementById('signup-email').value.trim();
+                appState.user = { name, email };
+                showToast(`Account created! Welcome to VeloceRide, ${name}.`, 'success');
+            }
+
+            updateHeaderAuthUI();
+            closeAuthModal();
+        }
+
+        function updateHeaderAuthUI() {
+            const container = document.getElementById('auth-header-controls');
+            if (appState.user) {
+                const initials = appState.user.name.slice(0, 2).toUpperCase();
+                container.innerHTML = `
+                    <div class="flex items-center gap-2.5 bg-slate-100 pl-2 pr-3 py-1.5 rounded-xl border border-slate-200">
+                        <div class="w-7 h-7 rounded-lg bg-slate-900 text-amber-400 text-xs font-bold flex items-center justify-center">${initials}</div>
+                        <span class="text-xs font-bold text-slate-800 hidden sm:inline">${appState.user.name}</span>
+                        <button onclick="logoutUser()" title="Log out" class="text-slate-400 hover:text-rose-600 ml-1 transition-colors">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button onclick="openAuthModal('login')" class="px-4 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors">
+                        Log in
+                    </button>
+                    <button onclick="openAuthModal('signup')" class="px-4 sm:px-5 py-2.5 text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 rounded-xl shadow-sm transition-all active:scale-95">
+                        Sign up
+                    </button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function logoutUser() {
+            appState.user = null;
+            updateHeaderAuthUI();
+            showToast('You have been logged out.', 'info');
+        }
+
+        // --- 8. MY TRIPS MODAL ---
+        function updateTripBadge() {
+            const badge = document.getElementById('trip-badge');
+            if (appState.bookings.length > 0) {
+                badge.textContent = appState.bookings.length;
+                badge.classList.remove('hidden');
+            }
+        }
+
+        function openMyTripsModal() {
+            const modal = document.getElementById('trips-modal');
+            const list = document.getElementById('trips-list-container');
+
+            if (appState.bookings.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="map" class="w-6 h-6"></i>
+                        </div>
+                        <p class="font-semibold text-slate-800 text-sm">No bookings yet</p>
+                        <p class="text-xs text-slate-500 mt-1">Search a route on the home page to book your first cab.</p>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = appState.bookings.map(b => `
+                    <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">${b.ref}</span>
+                            <span class="font-display font-bold text-sm text-slate-900">$${b.total}</span>
+                        </div>
+                        <div class="text-xs font-semibold text-slate-800">${b.pickup} → ${b.dropoff}</div>
+                        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/70">
+                            <span>${b.tierName} • ${b.driver.name}</span>
+                            <span>${b.datetime}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeMyTripsModal() {
+            document.getElementById('trips-modal').classList.add('hidden');
+        }
+
+        // --- 9. UTILITIES ---
+        function formatReadableDate(dateStr) {
+            if (!dateStr) return 'Today';
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const dateObj = new Date(y, m - 1, d);
+            return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-slate-900 text-white border-emerald-500',
+                error: 'bg-rose-950 text-white border-rose-500',
+                info: 'bg-slate-900 text-white border-amber-400'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border-l-4 shadow-xl text-xs sm:text-sm font-medium transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+    </script>
+</body>
+</html>
